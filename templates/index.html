@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Find hostels and PG accommodation in Kochi by rent and type."
+    >
+    <title>RentRadar | Find Your Stay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('home') }}">
+            <span class="brand-icon">R</span>
+            <span>RentRadar</span>
+        </a>
+        <span class="header-tagline">Find a stay that fits your budget</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <span class="eyebrow">YOUR NEXT STAY STARTS HERE</span>
+            <h1>Find your place in <span>Kochi.</span></h1>
+            <p>
+                Compare hostels and PG listings by location, accommodation
+                type, and monthly rent.
+            </p>
+        </section>
+
+        <section class="search-panel">
+            <div class="section-heading">
+                <h2>Find accommodation</h2>
+                <p>Choose your location, stay type, and budget.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('home') }}" class="search-form">
+                <div class="form-field">
+                    <label for="location">Location</label>
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        value="{{ location }}"
+                        placeholder="e.g. Kochi"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="accommodation_type">Accommodation type</label>
+                    <select id="accommodation_type" name="accommodation_type">
+                        <option value="all" {% if accommodation_type == "all" %}selected{% endif %}>All accommodations</option>
+                        <option value="mens" {% if accommodation_type == "mens" %}selected{% endif %}>Men's hostel</option>
+                        <option value="ladies" {% if accommodation_type == "ladies" %}selected{% endif %}>Ladies' hostel</option>
+                        <option value="coliving" {% if accommodation_type == "coliving" %}selected{% endif %}>Co-living</option>
+                        <option value="pg" {% if accommodation_type == "pg" %}selected{% endif %}>PG accommodation</option>
+                        <option value="other" {% if accommodation_type == "other" %}selected{% endif %}>Other / unclassified</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="min_rent">Minimum rent (₹/month)</label>
+                    <input
+                        type="number"
+                        id="min_rent"
+                        name="min_rent"
+                        min="0"
+                        value="{{ min_rent }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="max_rent">Maximum rent (₹/month)</label>
+                    <input
+                        type="number"
+                        id="max_rent"
+                        name="max_rent"
+                        min="0"
+                        value="{{ max_rent }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="sort_by">Sort by rent</label>
+                    <select id="sort_by" name="sort_by">
+                        <option value="rent_asc" {% if sort_by == "rent_asc" %}selected{% endif %}>Lowest first</option>
+                        <option value="rent_desc" {% if sort_by == "rent_desc" %}selected{% endif %}>Highest first</option>
+                    </select>
+                </div>
+
+                <button class="search-button" type="submit">Search stays</button>
+            </form>
+        </section>
+
+        <section class="results-section">
+            <div class="results-heading">
+                <div>
+                    <h2>Available stays</h2>
+                    <p>
+                        {{ location }} · ₹{{ "{:,}".format(min_rent|int) }}
+                        – ₹{{ "{:,}".format(max_rent|int) }} per month
+                    </p>
+                </div>
+                <span class="results-count">{{ properties|length }} found</span>
+            </div>
+
+            {% if message %}
+                <div class="notice">{{ message }}</div>
+            {% endif %}
+
+            {% if properties %}
+                <div class="property-grid">
+                    {% for property in properties %}
+                        <article class="property-card">
+                            {% if property.image %}
+                                <a
+                                    href="{{ property.url }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="property-image-link"
+                                >
+                                    <img
+                                        class="property-image"
+                                        src="{{ property.image }}"
+                                        alt="{{ property.title }}"
+                                        loading="lazy"
+                                    >
+                                </a>
+                            {% else %}
+                                <div class="image-placeholder">
+                                    <span>🏠</span>
+                                    <span>Accommodation</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="property-content">
+                                <span class="property-category">{{ property.category }}</span>
+                                <h3>{{ property.title }}</h3>
+
+                                <p class="property-location">
+                                    📍 {{ property.location }}
+                                </p>
+
+                                <div class="property-price">
+                                    <strong>₹{{ "{:,.0f}".format(property.rent) }}</strong>
+                                    <span>/ month</span>
+                                </div>
+
+                                <div class="property-footer">
+                                    <span class="property-source">{{ property.source }}</span>
+                                    <a
+                                        href="{{ property.url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="view-link"
+                                    >View listing ↗</a>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% elif not message %}
+                <div class="empty-state">
+                    <span>🔎</span>
+                    <h3>No stays found</h3>
+                    <p>Try another location or a wider rent range.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <p class="disclaimer">
+            Listings and prices are collected from the source website.
+            Confirm the current rent and availability on the original listing.
+        </p>
+    </main>
+
+    <footer class="site-footer">
+        <p>RentRadar · Find a stay that fits your budget.</p>
+    </footer>
+</body>
+</html>
